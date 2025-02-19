@@ -5,16 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Role extends Model
+class Category extends Model
 {
     use HasFactory;
-    
-    protected $fillable = [
-        'name',
-    ];
 
-    public function users()
+    protected $fillable = ['name'];
+
+    public function tickets()
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(Ticket::class);
     }
 }
