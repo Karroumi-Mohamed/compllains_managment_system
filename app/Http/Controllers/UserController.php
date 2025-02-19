@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use App\Models\Category;
+use App\Models\AgentRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -76,5 +78,33 @@ class UserController extends Controller
         $this->authorize('delete', $ticket);
         $ticket->delete();
         return redirect()->route('user.tickets')->with('success', 'Ticket deleted successfully');
+    }
+
+    public function submitAgentRequest(Request $request)
+    {
+        // Check if the user already has a pending request
+        $existingRequest = AgentRequest::where('user_id', Auth::id())->where('status', 'pending')->first();
+
+        if ($existingRequest) {
+            return redirect()->route('user')->with('error', 'You already have a pending agent request.');
+        }
+
+        AgentRequest::create([
+            'user_id' => Auth::id(),
+            'status' => 'pending',
+        ]);
+
+        return redirect()->route('user')->with('success', 'Agent request submitted successfully.');
+    }
+
+    public function getAgentRequestStatus()
+    {
+        $agentRequest = AgentRequest::where('user_id', Auth::id())->latest()->first();
+
+        if ($agentRequest) {
+            return view('user.dashboard', ['agentRequestStatus' => $agentRequest->status]);
+        }
+
+        return view('user.dashboard', ['agentRequestStatus' => null]);
     }
 }
