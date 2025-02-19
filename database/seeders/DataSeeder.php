@@ -16,6 +16,7 @@ class DataSeeder extends Seeder
         Role::insert([
             ['name' => 'admin'],
             ['name' => 'user'],
+            ['name' => 'agent'],
         ]);
     }
 }
