@@ -1,8 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\AgentController;
+use App\Http\Controllers\AuthController; // Import AuthController
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -12,6 +11,14 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+// Authentication Routes
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
 
 Route::middleware('auth')->group(function () {
 
@@ -50,5 +57,4 @@ Route::middleware('auth')->group(function () {
         Route::put('/admin/agent-requests/{agentRequest}/reject', [AdminController::class, 'rejectAgentRequest'])->name('admin.agent-requests.reject');
     });
 });
-
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
