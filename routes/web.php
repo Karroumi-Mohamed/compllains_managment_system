@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['guest'])->group(function () {
@@ -42,6 +43,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [AdminController::class, 'index'])->name('admin');
         Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
         Route::get('/categories', [AdminController::class, 'categories'])->name('admin.categories');
+
+        Route::post('/categories', [CategoryController::class, 'store'])->name('admin.category.create');
+        Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('admin.category.update');
+        Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('admin.category.delete');
 
         Route::prefix('tickets')->group(function () {
             Route::get('/', [AdminController::class, 'tickets'])->name('admin.tickets');

@@ -31,7 +31,7 @@ class AuthController extends Controller
             } elseif ($user->role->name === 'agent') {
                 return redirect('/agent');
             } elseif ($user->role->name === 'admin') {
-                return redirect('/admin', compact('user'));
+                return redirect('/admin');
             }
         }
         return back()->withErrors([
