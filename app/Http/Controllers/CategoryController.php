@@ -21,11 +21,11 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:categories'
+            'name' => 'required|string|max:255|unique:categories',
         ]);
 
         Category::create($validated);
-        return redirect()->route('categories.index')->with('success', 'Category created successfully');
+        return redirect()->route('admin.categories')->with('success', 'Category created successfully');
     }
 
     public function show(Category $category)
@@ -42,16 +42,20 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name,' . $category->id
+            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
         ]);
 
         $category->update($validated);
-        return redirect()->route('categories.index')->with('success', 'Category updated successfully');
+        return redirect()->route('admin.categories')->with('success', 'Category updated successfully');
     }
 
     public function destroy(Category $category)
     {
+        if($category->tickets()->exists()) {
+            return redirect()->route('admin.categories')->with('error', 'Cannot delete category that has tickets');
+        }
+        
         $category->delete();
-        return redirect()->route('categories.index')->with('success', 'Category deleted successfully');
+        return redirect()->route('admin.categories')->with('success', 'Category deleted successfully');
     }
 }

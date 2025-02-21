@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Category;
 use App\Models\AgentRequest;
 use Illuminate\Http\Request;
 
@@ -51,5 +52,14 @@ class AdminController extends Controller
     {
         $agentRequest->update(['status' => 'rejected']);
         return redirect()->route('admin.agent-requests')->with('success', 'Agent request rejected successfully.');
+    }
+
+    public function categories()
+    {
+        $categories = Category::withCount('tickets')
+            ->latest()
+            ->paginate(2);
+            
+        return view('admin.categories', compact('categories'));
     }
 }

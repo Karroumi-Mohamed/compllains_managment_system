@@ -18,14 +18,31 @@
     <div class="min-h-screen flex">
         <x-user.sidebar />
 
-        <!-- Main Content -->
-        <main class="w-4/5 p-8">
-            <div class="max-w-4xl mx-auto">
-                <h1 class="text-4xl font-bold text-repeatyellow font-display mb-12">Create New Ticket</h1>
+        <!-- Main Content Area -->
+        <main class="flex-1 px-12 py-10">
+            <!-- Header Section with enhanced styling -->
+            <header class="mb-16 relative">
+                <div class="max-w-3xl">
+                    <h1 class="text-6xl font-display font-bold text-repeatyellow mb-4 leading-tight">
+                        Create New Ticket
+                    </h1>
+                    <p class="text-xl text-gray-400 leading-relaxed">
+                        Submit a new support request and we'll help you out.
+                    </p>
+                </div>
+                <!-- Decorative element -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-repeatyellow/5 rounded-full blur-3xl -z-10"></div>
+            </header>
 
+            <!-- Form Section -->
+            <div class="max-w-3xl">
                 @if ($errors->any())
-                    <div class="bg-red-500 bg-opacity-10 border border-red-400 text-red-400 px-6 py-4 rounded-lg mb-8">
-                        <ul class="list-disc list-inside">
+                    <div class="bg-red-500/10 backdrop-blur-sm border border-red-500/20 rounded-xl p-6 mb-8">
+                        <div class="flex items-center mb-4">
+                            <i class="fa-solid fa-circle-exclamation text-red-500 mr-3"></i>
+                            <h3 class="text-lg font-medium text-red-400">Please fix the following errors</h3>
+                        </div>
+                        <ul class="space-y-1 text-red-400 text-sm ml-6">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
@@ -34,50 +51,65 @@
                 @endif
 
                 <form action="{{ route('user.ticket.store') }}" method="POST"
-                    class="space-y-8 rounded-xl p-8 shadow-xl">
+                    class="bg-black/40 rounded-xl border border-gray-800/50 p-8 space-y-8 backdrop-blur-sm">
                     @csrf
+
+                    <!-- Title Field -->
                     <div class="space-y-2">
-                        <label for="title" class="block text-base font-medium text-gray-300">Ticket Title</label>
-                        <input type="text" name="title" id="title"
-                            class="block w-full px-4 py-3 rounded-lg border-2 border-gray-700 text-gray-300 
-                            placeholder-gray-500 focus:border-repeatyellow focus:ring-2 focus:ring-repeatyellow focus:ring-opacity-50 
-                            transition-colors duration-200"
-                            placeholder="Enter a descriptive title for your ticket" required>
+                        <label for="title" class="block text-sm font-medium text-gray-300">Ticket Title</label>
+                        <div class="relative">
+                            <input type="text" name="title" id="title"
+                                class="block w-full px-4 py-3 rounded-lg bg-black/40 border-2 border-gray-700 text-gray-300 
+                                placeholder-gray-500 focus:border-repeatyellow focus:ring-2 focus:ring-repeatyellow focus:ring-opacity-50 
+                                transition-colors duration-200"
+                                placeholder="Enter a descriptive title for your ticket"
+                                value="{{ old('title') }}"
+                                required>
+                        </div>
                     </div>
 
+                    <!-- Category Field -->
                     <div class="space-y-2">
-                        <label for="category_id" class="block text-base font-medium text-gray-300">Category</label>
+                        <label for="category_id" class="block text-sm font-medium text-gray-300">Category</label>
                         <select name="category_id" id="category_id"
-                            class="block w-full px-4 py-3 rounded-lg border-2 border-gray-700 text-gray-300 
+                            class="block w-full px-4 py-3 rounded-lg bg-black/40 border-2 border-gray-700 text-gray-300 
                             focus:border-repeatyellow focus:ring-2 focus:ring-repeatyellow focus:ring-opacity-50 
                             transition-colors duration-200"
                             required>
-                            <option value="" class="bg-gray-800">Select a category</option>
+                            <option value="" class="bg-repeatblack">Select a category</option>
                             @foreach ($categories as $category)
-                                <option value="{{ $category->id }}" class="bg-gray-800">{{ $category->name }}</option>
+                                <option value="{{ $category->id }}" class="bg-repeatblack"
+                                    {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
 
+                    <!-- Description Field -->
                     <div class="space-y-2">
-                        <label for="description" class="block text-base font-medium text-gray-300">Description</label>
+                        <label for="description" class="block text-sm font-medium text-gray-300">Description</label>
                         <textarea name="description" id="description" rows="8"
-                            class="block w-full px-4 py-3 rounded-lg border-2 border-gray-700 text-gray-300 
+                            class="block w-full px-4 py-3 rounded-lg bg-black/40 border-2 border-gray-700 text-gray-300 
                             placeholder-gray-500 focus:border-repeatyellow focus:ring-2 focus:ring-repeatyellow focus:ring-opacity-50 
                             transition-colors duration-200 resize-none"
-                            placeholder="Provide detailed information about your issue..." required></textarea>
+                            placeholder="Provide detailed information about your issue..."
+                            required>{{ old('description') }}</textarea>
                     </div>
 
-                    <div class="flex justify-end space-x-4 pt-4">
+                    <!-- Action Buttons -->
+                    <div class="flex items-center justify-end space-x-4 pt-4">
                         <a href="{{ route('user') }}"
-                            class="px-6 py-3 border-2 border-gray-700 rounded-lg text-gray-300 hover:bg-gray-800 
-                            hover:border-gray-600 transition-colors duration-200">
+                            class="px-6 py-3 rounded-lg inline-flex items-center justify-center border-2 border-gray-700 
+                            text-gray-300 hover:bg-gray-800 hover:border-gray-600 transition-all duration-200 min-w-[120px]">
                             Cancel
                         </a>
                         <button type="submit"
-                            class="px-6 py-3 bg-repeatyellow rounded-lg text-repeatblack font-medium hover:bg-yellow-400 
-                            transform hover:scale-105 transition-all duration-200">
-                            Create Ticket
+                            class="px-6 py-3 rounded-lg inline-flex items-center justify-center bg-repeatyellow 
+                            text-repeatblack font-medium hover:bg-[#FCD34D] transition-all duration-200 min-w-[120px]
+                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-repeatblack focus:ring-repeatyellow">
+                            <i class="fa-solid fa-paper-plane mr-2"></i>
+                            Submit
                         </button>
                     </div>
                 </form>
