@@ -9,17 +9,16 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, $role): Response
     {
-
-        if (!Auth::check() ||$request->input('role') !== 'admin') {
-            return response('Unauthorized.', 401);
+        if (!Auth::check()) {
+            return redirect('login');
         }
+
+        if (Auth::user()->role->name !== $role) {
+            abort(403, 'Unauthorized action.');
+        }
+
         return $next($request);
     }
 }

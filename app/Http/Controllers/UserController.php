@@ -12,12 +12,23 @@ class UserController extends Controller
 {
     public function index()
     {
-        return view('user.dashboard');
+        $user = Auth::user();
+        $recentTickets = Ticket::where('user_id', $user->id)
+            ->with(['category'])
+            ->latest()
+            ->take(3)
+            ->get();
+
+        $hasAgentRequest = AgentRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->exists();
+
+        return view('user.index', compact('user', 'recentTickets', 'hasAgentRequest'));
     }
 
     public function tickets()
     {
-        $tickets = Ticket::where('user_id', auth()->id())
+        $tickets = Ticket::where('user_id', Auth::user()->id)
             ->with(['category', 'agent'])
             ->latest()
             ->paginate(10);
@@ -34,35 +45,33 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'required|string|min:10',
             'category_id' => 'required|exists:categories,id'
         ]);
 
         $ticket = Ticket::create([
             ...$validated,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'status' => 'open'
         ]);
 
-        return redirect()->route('user.ticket', $ticket)->with('success', 'Ticket created successfully');
+        return redirect()->route('ticket', $ticket)
+            ->with('success', 'Ticket created successfully');
     }
 
     public function ticket(Ticket $ticket)
     {
-        $this->authorize('view', $ticket);
         return view('user.ticket-details', compact('ticket'));
     }
 
     public function editTicket(Ticket $ticket)
     {
-        $this->authorize('update', $ticket);
         $categories = Category::all();
         return view('user.edit-ticket', compact('ticket', 'categories'));
     }
 
     public function updateTicket(Request $request, Ticket $ticket)
     {
-        $this->authorize('update', $ticket);
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -75,7 +84,6 @@ class UserController extends Controller
 
     public function deleteTicket(Ticket $ticket)
     {
-        $this->authorize('delete', $ticket);
         $ticket->delete();
         return redirect()->route('user.tickets')->with('success', 'Ticket deleted successfully');
     }
