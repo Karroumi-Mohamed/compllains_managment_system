@@ -1,60 +1,59 @@
 <?php
 
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\AuthController; // Import AuthController
+use App\Http\Controllers\AgentController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::middleware(['guest'])->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+
+    Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-// Authentication Routes
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
-
-Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
-
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth'])->group(function () {
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::middleware('role:user')->group(function () {
-        Route::get('/user', [UserController::class, 'index'])->name('user');
-        Route::get('/user/tickets', [UserController::class, 'tickets'])->name('user.tickets');
-        Route::get('/user/tickets/create', [UserController::class, 'createTicket'])->name('user.ticket.create');
-        Route::post('/user/tickets', [UserController::class, 'storeTicket'])->name('user.ticket.store');
-        Route::get('/user/tickets/{ticket}', [UserController::class, 'ticket'])->name('user.ticket');
-        Route::get('/user/tickets/{ticket}/edit', [UserController::class, 'editTicket'])->name('user.ticket.edit');
-        Route::put('/user/tickets/{ticket}', [UserController::class, 'updateTicket'])->name('user.ticket.update');
-        Route::delete('/user/tickets/{ticket}', [UserController::class, 'deleteTicket'])->name('user.ticket.delete');
+        Route::get('/', [UserController::class, 'index'])->name('user');
+        Route::get('/tickets', [UserController::class, 'tickets'])->name('user.tickets');
+        Route::get('/tickets/create', [UserController::class, 'createTicket'])->name('user.ticket.create');
+        Route::post('/tickets', [UserController::class, 'storeTicket'])->name('user.ticket.store');
+        Route::get('/tickets/{ticket}', [UserController::class, 'ticket'])->name('user.ticket');
+        Route::get('/tickets/{ticket}/edit', [UserController::class, 'editTicket'])->name('user.ticket.edit');
+        Route::put('/tickets/{ticket}', [UserController::class, 'updateTicket'])->name('user.ticket.update');
+        Route::delete('/tickets/{ticket}', [UserController::class, 'deleteTicket'])->name('user.ticket.delete');
 
-        Route::post('/user/agent-request', [UserController::class, 'submitAgentRequest'])->name('user.agent-request.submit');
+        Route::post('/agent-request', [UserController::class, 'submitAgentRequest'])->name('user.agent-request.submit');
     });
 
-    Route::middleware('role:agent')->group(function () {
-        Route::get('/agent', [AgentController::class, 'index'])->name('agent');
-        Route::get('/agent/tickets', [AgentController::class, 'tickets'])->name('agent.tickets');
-        Route::get('/agent/tickets/{ticket}', [AgentController::class, 'ticket'])->name('agent.ticket');
-        Route::get('/agent/tickets/{ticket}/edit', [AgentController::class, 'editTicket'])->name('agent.ticket.edit');
-        Route::put('/agent/tickets/{ticket}', [AgentController::class, 'updateTicket'])->name('agent.ticket.update');
+    Route::prefix('agent')->middleware('role:agent')->group(function () {
+        Route::get('/', [AgentController::class, 'index'])->name('agent');
+        Route::get('/tickets', [AgentController::class, 'tickets'])->name('agent.tickets');
+        Route::get('/tickets/{ticket}', [AgentController::class, 'ticket'])->name('agent.ticket');
+        Route::get('/tickets/{ticket}/edit', [AgentController::class, 'editTicket'])->name('agent.ticket.edit');
+        Route::put('/tickets/{ticket}', [AgentController::class, 'updateTicket'])->name('agent.ticket.update');
     });
 
-    Route::middleware('role:admin')->group(function () {
-        Route::get('/admin', [AdminController::class, 'index'])->name('admin');
-        Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
-        Route::get('/admin/categories', [AdminController::class, 'categories'])->name('admin.categories');
-        Route::get('/admin/tickets', [AdminController::class, 'tickets'])->name('admin.tickets');
-        Route::get('/admin/tickets/{ticket}', [AdminController::class, 'ticket'])->name('admin.ticket');
-        Route::get('/admin/tickets/{ticket}/edit', [AdminController::class, 'editTicket'])->name('admin.ticket.edit');
-        Route::delete('/admin/tickets/{ticket}', [AdminController::class, 'deleteTicket'])->name('admin.ticket.delete');
+    Route::prefix('admin')->middleware('role:admin')->group(function () {
+        Route::get('/', [AdminController::class, 'index'])->name('admin');
+        Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+        Route::get('/categories', [AdminController::class, 'categories'])->name('admin.categories');
 
-        Route::get('/admin/agent-requests', [AdminController::class, 'agentRequests'])->name('admin.agent-requests');
-        Route::put('/admin/agent-requests/{agentRequest}/approve', [AdminController::class, 'approveAgentRequest'])->name('admin.agent-requests.approve');
-        Route::put('/admin/agent-requests/{agentRequest}/reject', [AdminController::class, 'rejectAgentRequest'])->name('admin.agent-requests.reject');
+        Route::prefix('tickets')->group(function () {
+            Route::get('/', [AdminController::class, 'tickets'])->name('admin.tickets');
+            Route::get('/{ticket}', [AdminController::class, 'ticket'])->name('admin.ticket');
+            Route::get('/{ticket}/edit', [AdminController::class, 'editTicket'])->name('admin.ticket.edit');
+            Route::delete('/{ticket}', [AdminController::class, 'deleteTicket'])->name('admin.ticket.delete');
+        });
+
+        Route::prefix('agent-requests')->group(function () {
+            Route::get('/', [AdminController::class, 'agentRequests'])->name('admin.agent-requests');
+            Route::put('/{agentRequest}/approve', [AdminController::class, 'approveAgentRequest'])->name('admin.agent-requests.approve');
+            Route::put('/{agentRequest}/reject', [AdminController::class, 'rejectAgentRequest'])->name('admin.agent-requests.reject');
+        });
     });
 });
-require __DIR__.'/auth.php';

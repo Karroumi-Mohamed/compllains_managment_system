@@ -1,3 +1,57 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@source "../views";
+
+
+/* Custom colors */
+.bg-repeatyellow {
+    background-color: #FFC700;
+}
+
+.bg-repeatblack {
+    background-color: #171717;
+}
+
+.text-repeatyellow {
+    color: #FFC700;
+}
+
+.text-repeatblack {
+    color: #171717;
+}
+
+/* Custom fonts */
+.font-display {
+    font-family: 'Playfair Display', serif;
+}
+
+.font-body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Custom focus states */
+.focus\:ring-repeatyellow:focus {
+    --tw-ring-color: #FFC700;
+}
+
+.focus\:border-repeatyellow:focus {
+    border-color: #FFC700;
+}
+
+/* Custom border radius */
+.rounded-xlarge {
+    border-radius: 2rem;
+}
+
+/* Hover states */
+.hover\:bg-yellow-300:hover {
+    background-color: #FCD34D;
+}
+
+/* Focus ring offset */
+.focus\:ring-offset-2:focus {
+    --tw-ring-offset-width: 2px;
+}
+
+.focus\:ring-yellow-500:focus {
+    --tw-ring-color: #EAB308;
+}

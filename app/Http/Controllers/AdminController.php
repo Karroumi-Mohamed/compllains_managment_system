@@ -2,14 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AgentRequest;
 use App\Models\User;
+use App\Models\Role;
+use App\Models\AgentRequest;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    public function show() {
-        return view('admin.show');
+    public function index()
+    {
+        $data = [
+            'totalUsers' => User::count(),
+            'adminUsers' => User::whereHas('role', function($q) {
+                $q->where('name', 'admin');
+            })->count(),
+            'regularUsers' => User::whereHas('role', function($q) {
+                $q->where('name', 'user');
+            })->count(),
+            'agentUsers' => User::whereHas('role', function($q) {
+                $q->where('name', 'agent');
+            })->count(),
+            'pendingAgentRequests' => AgentRequest::where('status', 'pending')->count(),
+            'recentUsers' => User::with('role')
+                ->latest()
+                ->take(5)
+                ->get(),
+        ];
+
+        return view('admin.dashboard', $data);
     }
 
     public function agentRequests()
