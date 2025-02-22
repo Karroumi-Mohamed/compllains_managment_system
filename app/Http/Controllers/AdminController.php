@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Role;
-use App\Models\Category;
 use App\Models\AgentRequest;
 use Illuminate\Http\Request;
 
@@ -35,15 +34,18 @@ class AdminController extends Controller
 
     public function agentRequests()
     {
-        $agentRequests = AgentRequest::with('user')->paginate(10);
+        $agentRequests = AgentRequest::with('user')
+            ->latest()
+            ->paginate(10);
         return view('admin.agent-requests', compact('agentRequests'));
     }
 
     public function approveAgentRequest(AgentRequest $agentRequest)
     {
         $agentRequest->update(['status' => 'approved']);
-        $user = User::find($agentRequest->user_id);
-        $user->update(['role' => 'agent']);
+        
+        $agentRole = Role::where('name', 'agent')->first();
+        $agentRequest->user->update(['role_id' => $agentRole->id]);
 
         return redirect()->route('admin.agent-requests')->with('success', 'Agent request approved successfully.');
     }
@@ -52,14 +54,5 @@ class AdminController extends Controller
     {
         $agentRequest->update(['status' => 'rejected']);
         return redirect()->route('admin.agent-requests')->with('success', 'Agent request rejected successfully.');
-    }
-
-    public function categories()
-    {
-        $categories = Category::withCount('tickets')
-            ->latest()
-            ->paginate(2);
-            
-        return view('admin.categories', compact('categories'));
     }
 }
