@@ -64,4 +64,9 @@ class Ticket extends Model
     {
         return $this->status === self::STATUS_CLOSED;
     }
+
+    public function response()
+    {
+        return $this->hasOne(TicketResponse::class);
+    }
 }

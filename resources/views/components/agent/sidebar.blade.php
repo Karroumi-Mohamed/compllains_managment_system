@@ -25,7 +25,7 @@
 
     <!-- Footer -->
     <div class="mt-auto pt-8">
-        <form method="POST" action="{{ route('logout') }}">
+        <form method="GET" action="{{ route('logout') }}">
             @csrf
             <button type="submit" 
                     class="w-full flex items-center px-4 py-3 text-gray-400 rounded-lg hover:bg-black/20 hover:text-white">

@@ -13,7 +13,7 @@
 
 <body class="bg-repeatblack font-body antialiased text-gray-300">
     <div class="min-h-screen flex">
-        <x-user.sidebar />
+        <x-admin.sidebar />
 
         <!-- Main Content Area -->
         <main class="flex-1 px-12 py-10">
@@ -21,7 +21,7 @@
             <header class="mb-16 relative">
                 <div class="max-w-3xl">
                     <div class="flex items-center gap-4 mb-6">
-                        <a href="{{ route('user.tickets') }}" class="text-gray-400 hover:text-white transition-colors duration-200">
+                        <a href="{{ route('admin.tickets') }}" class="text-gray-400 hover:text-white transition-colors duration-200">
                             <i class="fa-solid fa-arrow-left"></i>
                         </a>
                         <div class="px-3 py-1 rounded-full text-xs font-medium ring-1
@@ -31,10 +31,15 @@
                             {{ ucfirst($ticket->status) }}
                         </div>
                     </div>
+
                     <h1 class="text-6xl font-display font-bold text-repeatyellow mb-4 leading-tight">
                         #{{ $ticket->id }} - {{ $ticket->title }}
                     </h1>
                     <div class="flex items-center gap-6 text-gray-400">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-regular fa-user"></i>
+                            Submitted by {{ $ticket->user->name }}
+                        </div>
                         <div class="flex items-center gap-2">
                             <i class="fa-regular fa-folder"></i>
                             {{ $ticket->category->name }}
@@ -45,7 +50,7 @@
                         </div>
                         @if($ticket->agent)
                             <div class="flex items-center gap-2">
-                                <i class="fa-regular fa-user"></i>
+                                <i class="fa-solid fa-user-shield"></i>
                                 Assigned to {{ $ticket->agent->name }}
                             </div>
                         @endif
@@ -65,6 +70,30 @@
                     </div>
                 </div>
 
+                <!-- Agent Assignment -->
+                @if(!$ticket->agent)
+                    <div class="bg-black/40 rounded-xl border border-gray-800/50 p-8">
+                        <h2 class="text-xl font-display font-bold text-white mb-4">Assign Agent</h2>
+                        <form action="{{ route('admin.assign.agent', $ticket) }}" method="POST">
+                            @csrf
+                            <div class="flex gap-4">
+                                <select name="agent_id" 
+                                        class="flex-1 bg-black/40 border border-gray-700 rounded-lg text-gray-300 px-4 py-3">
+                                    <option value="">Select an Agent</option>
+                                    @foreach(App\Models\User::whereHas('role', fn($q) => $q->where('name', 'agent'))->get() as $agent)
+                                        <option value="{{ $agent->id }}">{{ $agent->name }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="submit"
+                                        class="px-6 py-3 rounded-lg inline-flex items-center bg-repeatyellow/10 text-repeatyellow border border-repeatyellow/20 hover:bg-repeatyellow/20 transition-all duration-200">
+                                    <i class="fa-solid fa-user-plus mr-2"></i>
+                                    Assign
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                @endif
+
                 <!-- Agent Response -->
                 @if($ticket->response)
                     <div class="bg-black/40 rounded-xl border border-gray-800/50 p-8">
@@ -79,25 +108,23 @@
                 @endif
 
                 <!-- Actions -->
-                @if(!$ticket->isClosed())
-                    <div class="flex items-center justify-end space-x-4">
-                        <a href="{{ route('user.ticket.edit', $ticket) }}" 
-                           class="px-6 py-3 rounded-lg inline-flex items-center bg-repeatyellow/10 text-repeatyellow border border-repeatyellow/20 hover:bg-repeatyellow/20 transition-all duration-200">
-                            <i class="fa-solid fa-pen-to-square mr-2"></i>
-                            Edit Ticket
-                        </a>
-                        <form action="{{ route('user.ticket.delete', $ticket) }}" method="POST" class="inline"
-                              onsubmit="return confirm('Are you sure you want to delete this ticket?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    class="px-6 py-3 rounded-lg inline-flex items-center bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-all duration-200">
-                                <i class="fa-solid fa-trash mr-2"></i>
-                                Delete Ticket
-                            </button>
-                        </form>
-                    </div>
-                @endif
+                <div class="flex items-center justify-end space-x-4">
+                    <a href="{{ route('admin.ticket.edit', $ticket) }}" 
+                       class="px-6 py-3 rounded-lg inline-flex items-center bg-repeatyellow/10 text-repeatyellow border border-repeatyellow/20 hover:bg-repeatyellow/20 transition-all duration-200">
+                        <i class="fa-solid fa-pen-to-square mr-2"></i>
+                        Edit Ticket
+                    </a>
+                    <form action="{{ route('admin.ticket.delete', $ticket) }}" method="POST" class="inline"
+                          onsubmit="return confirm('Are you sure you want to delete this ticket?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                                class="px-6 py-3 rounded-lg inline-flex items-center bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-all duration-200">
+                            <i class="fa-solid fa-trash mr-2"></i>
+                            Delete Ticket
+                        </button>
+                    </form>
+                </div>
             </div>
         </main>
     </div>

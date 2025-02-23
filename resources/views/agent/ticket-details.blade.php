@@ -13,7 +13,7 @@
 
 <body class="bg-repeatblack font-body antialiased text-gray-300">
     <div class="min-h-screen flex">
-        <x-user.sidebar />
+        <x-agent.sidebar />
 
         <!-- Main Content Area -->
         <main class="flex-1 px-12 py-10">
@@ -21,7 +21,7 @@
             <header class="mb-16 relative">
                 <div class="max-w-3xl">
                     <div class="flex items-center gap-4 mb-6">
-                        <a href="{{ route('user.tickets') }}" class="text-gray-400 hover:text-white transition-colors duration-200">
+                        <a href="{{ route('agent.tickets') }}" class="text-gray-400 hover:text-white transition-colors duration-200">
                             <i class="fa-solid fa-arrow-left"></i>
                         </a>
                         <div class="px-3 py-1 rounded-full text-xs font-medium ring-1
@@ -36,6 +36,10 @@
                     </h1>
                     <div class="flex items-center gap-6 text-gray-400">
                         <div class="flex items-center gap-2">
+                            <i class="fa-regular fa-user"></i>
+                            {{ $ticket->user->name }}
+                        </div>
+                        <div class="flex items-center gap-2">
                             <i class="fa-regular fa-folder"></i>
                             {{ $ticket->category->name }}
                         </div>
@@ -43,12 +47,6 @@
                             <i class="fa-regular fa-clock"></i>
                             {{ $ticket->created_at->format('M d, Y') }}
                         </div>
-                        @if($ticket->agent)
-                            <div class="flex items-center gap-2">
-                                <i class="fa-regular fa-user"></i>
-                                Assigned to {{ $ticket->agent->name }}
-                            </div>
-                        @endif
                     </div>
                 </div>
                 <!-- Decorative element -->
@@ -65,36 +63,61 @@
                     </div>
                 </div>
 
-                <!-- Agent Response -->
-                @if($ticket->response)
-                    <div class="bg-black/40 rounded-xl border border-gray-800/50 p-8">
-                        <h2 class="text-xl font-display font-bold text-white mb-4">Agent Response</h2>
+                <!-- Response Section -->
+                <div class="bg-black/40 rounded-xl border border-gray-800/50 p-8">
+                    <h2 class="text-xl font-display font-bold text-white mb-4">Agent Response</h2>
+                    @if($ticket->response)
                         <div class="bg-white/5 rounded-lg p-6">
                             <p class="text-gray-300">{{ $ticket->response->message }}</p>
                             <div class="mt-4 text-sm text-gray-500">
-                                Response from {{ $ticket->response->agent->name }} • {{ $ticket->response->created_at->diffForHumans() }}
+                                Responded {{ $ticket->response->created_at->diffForHumans() }}
                             </div>
                         </div>
-                    </div>
-                @endif
-
-                <!-- Actions -->
-                @if(!$ticket->isClosed())
-                    <div class="flex items-center justify-end space-x-4">
-                        <a href="{{ route('user.ticket.edit', $ticket) }}" 
-                           class="px-6 py-3 rounded-lg inline-flex items-center bg-repeatyellow/10 text-repeatyellow border border-repeatyellow/20 hover:bg-repeatyellow/20 transition-all duration-200">
-                            <i class="fa-solid fa-pen-to-square mr-2"></i>
-                            Edit Ticket
-                        </a>
-                        <form action="{{ route('user.ticket.delete', $ticket) }}" method="POST" class="inline"
-                              onsubmit="return confirm('Are you sure you want to delete this ticket?');">
+                    @else
+                        <form action="{{ route('agent.ticket.respond', $ticket) }}" method="POST" class="space-y-4">
                             @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    class="px-6 py-3 rounded-lg inline-flex items-center bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-all duration-200">
-                                <i class="fa-solid fa-trash mr-2"></i>
-                                Delete Ticket
-                            </button>
+                            <textarea name="message" 
+                                    rows="4" 
+                                    class="w-full bg-black/40 border border-gray-800/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-repeatyellow/20 focus:border-repeatyellow/30 transition-all duration-200"
+                                    placeholder="Write your response here..."
+                                    required></textarea>
+                            @error('message')
+                                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                            @enderror
+                            <div class="flex justify-end">
+                                <button type="submit"
+                                        class="px-6 py-3 rounded-lg inline-flex items-center bg-repeatyellow/10 text-repeatyellow border border-repeatyellow/20 hover:bg-repeatyellow/20 transition-all duration-200">
+                                    <i class="fa-solid fa-paper-plane mr-2"></i>
+                                    Submit Response
+                                </button>
+                            </div>
+                        </form>
+                    @endif
+                </div>
+
+                <!-- Status Update -->
+                @if(!$ticket->isClosed())
+                    <div class="bg-black/40 rounded-xl border border-gray-800/50 p-8">
+                        <h2 class="text-xl font-display font-bold text-white mb-4">Update Status</h2>
+                        <form action="{{ route('agent.ticket.update', $ticket) }}" method="POST" class="space-y-4">
+                            @csrf
+                            @method('PUT')
+                            <select name="status" 
+                                    class="w-full bg-black/40 border border-gray-800/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-repeatyellow/20 focus:border-repeatyellow/30 transition-all duration-200">
+                                <option value="open" {{ $ticket->status === 'open' ? 'selected' : '' }}>Open</option>
+                                <option value="in_progress" {{ $ticket->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                                <option value="closed" {{ $ticket->status === 'closed' ? 'selected' : '' }}>Closed</option>
+                            </select>
+                            @error('status')
+                                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                            @enderror
+                            <div class="flex justify-end">
+                                <button type="submit"
+                                        class="px-6 py-3 rounded-lg inline-flex items-center bg-repeatyellow/10 text-repeatyellow border border-repeatyellow/20 hover:bg-repeatyellow/20 transition-all duration-200">
+                                    <i class="fa-solid fa-arrows-rotate mr-2"></i>
+                                    Update Status
+                                </button>
+                            </div>
                         </form>
                     </div>
                 @endif

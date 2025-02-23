@@ -48,4 +48,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(AgentRequest::class);
     }
+
+    public function ticketResponses()
+    {
+        return $this->hasMany(TicketResponse::class, 'agent_id');
+    }
 }
