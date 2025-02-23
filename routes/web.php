@@ -36,11 +36,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/tickets/{ticket}', [AgentController::class, 'ticket'])->name('agent.ticket');
         Route::get('/tickets/{ticket}/edit', [AgentController::class, 'editTicket'])->name('agent.ticket.edit');
         Route::put('/tickets/{ticket}', [AgentController::class, 'updateTicket'])->name('agent.ticket.update');
+        Route::post('/tickets/{ticket}/respond', [AgentController::class, 'respondToTicket'])->name('agent.ticket.respond');
     });
 
     Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::get('/', [AdminController::class, 'index'])->name('admin');
         Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+        Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+        Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
         Route::get('/categories', [AdminController::class, 'categories'])->name('admin.categories');
         Route::post('/categories/create', [AdminController::class, 'createCategory'])->name('admin.category.create');
         Route::delete('/categories/{category}', [AdminController::class, 'deleteCategory'])->name('admin.category.delete');
@@ -50,7 +53,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [AdminController::class, 'tickets'])->name('admin.tickets');
             Route::get('/{ticket}', [AdminController::class, 'ticket'])->name('admin.ticket');
             Route::get('/{ticket}/edit', [AdminController::class, 'editTicket'])->name('admin.ticket.edit');
+            Route::put('/{ticket}', [AdminController::class, 'updateTicket'])->name('admin.ticket.update');
             Route::delete('/{ticket}', [AdminController::class, 'deleteTicket'])->name('admin.ticket.delete');
+            Route::post('/{ticket}/assign', [AdminController::class, 'assignAgent'])->name('admin.assign.agent');
         });
 
         Route::prefix('agent-requests')->group(function () {

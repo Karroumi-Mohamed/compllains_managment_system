@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
+use App\Models\TicketResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,6 +29,12 @@ class AgentController extends Controller
 
     public function tickets()
     {
+        $tickets = Auth::user()
+            ->assignedTickets()
+            ->with(['user', 'category', 'response'])
+            ->latest()
+            ->paginate(10);
+            
         return view('agent.tickets', compact('tickets'));
     }
 
@@ -50,5 +57,26 @@ class AgentController extends Controller
  
         $ticket->update($validated);
         return redirect()->route('agent.ticket', $ticket)->with('success', 'Ticket updated successfully');
+    }
+
+    public function respondToTicket(Request $request, Ticket $ticket)
+    {
+        $validated = $request->validate([
+            'message' => 'required|string|min:10',
+        ]);
+
+        // Create the response
+        $ticket->response()->create([
+            'message' => $validated['message'],
+            'agent_id' => Auth::id(),
+        ]);
+
+        // Update ticket status to in_progress if it's open
+        if ($ticket->isOpen()) {
+            $ticket->update(['status' => 'in_progress']);
+        }
+
+        return redirect()->route('agent.ticket', $ticket)
+            ->with('success', 'Response added successfully');
     }
 }

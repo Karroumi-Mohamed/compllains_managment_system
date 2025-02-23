@@ -38,7 +38,7 @@ class UserController extends Controller
     public function createTicket()
     {
         $categories = Category::all();
-        return view('user.create-ticket', compact('categories'));
+        return view('user.tickets.create', compact('categories'));
     }
 
     public function storeTicket(Request $request)
@@ -46,28 +46,35 @@ class UserController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|min:10',
-            'category_id' => 'required|exists:categories,id'
+            'category_id' => 'required|exists:categories,id',
         ]);
 
         $ticket = Ticket::create([
-            ...$validated,
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'category_id' => $validated['category_id'],
             'user_id' => Auth::id(),
             'status' => 'open'
         ]);
 
-        return redirect()->route('ticket', $ticket)
-            ->with('success', 'Ticket created successfully');
+        return redirect()->route('user.ticket', $ticket)
+            ->with('success', 'Ticket created successfully.');
     }
 
     public function ticket(Ticket $ticket)
     {
-        return view('user.ticket-details', compact('ticket'));
+        // Ensure user can only view their own tickets
+        if ($ticket->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+        
+        return view('user.tickets.ticket-details', compact('ticket'));
     }
 
     public function editTicket(Ticket $ticket)
     {
         $categories = Category::all();
-        return view('user.edit-ticket', compact('ticket', 'categories'));
+        return view('user.tickets.edit', compact('ticket', 'categories'));
     }
 
     public function updateTicket(Request $request, Ticket $ticket)
